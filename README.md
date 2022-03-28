@@ -6,6 +6,9 @@ Docker image to build and run mistserver with SRT procotol.
 Has only been tested on linux systems.
 
 ## Build
+
+Docker [buildkit](https://docs.docker.com/develop/develop-images/build_enhancements/#to-enable-buildkit-builds) is required 
+
 ```
 docker build -t leafnode-labs/mistserver .
 ```

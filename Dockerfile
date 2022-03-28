@@ -46,21 +46,28 @@ RUN cmake .
 RUN make
 RUN make install
 
-FROM debian:stable-slim as mistserver
-# Copy shared libraries needed to run mistserver
-#COPY --from=builder /usr/local/lib/lib* /usr/local/lib/
-#COPY --from=builder /usr/lib/* /usr/lib/
-#COPY --from=builder /usr/bin/Mist* /usr/bin/
-COPY --from=builder /usr /usr
-RUN ldconfig
+# Detecting dependencies
+WORKDIR /app
+RUN for M in /usr/bin/Mist* ; do ldd $M 2>/dev/null | grep -o "/[^[:space:]]*" >> unsorted_dependencies; echo $M >> unsorted_dependencies ; done
+RUN ls -1 /usr/local/lib/libsrt* >> unsorted_dependencies
+RUN cat unsorted_dependencies | sort -u > dependencies
+RUN strip -s /usr/bin/Mist*
+RUN strip -s `find /lib | grep \.so$`
 
-# Config
+FROM debian:stable-slim as mistserver
+
+# Copy shared libraries needed to run mistserver
+COPY --from=builder /app/dependencies /app/dependencies
+RUN --mount=type=bind,from=builder,source=/,target=/app/rootbuilder while IFS= read -r DEP ; do cp -ar "/app/rootbuilder$DEP" "$DEP" ; done < "/app/dependencies"
+RUN ldconfig
+#
+## Config
 WORKDIR /app
 RUN mkdir -p config media
 COPY server.conf config/
+##
+##EXPOSE 4242 8080 1935 554 8889
 #
-#EXPOSE 4242 8080 1935 554 8889
-
 ENTRYPOINT ["MistController",  "-c", "/app/config/server.conf"]
 
 #VOLUME /config /media
