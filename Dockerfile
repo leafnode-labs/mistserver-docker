@@ -64,7 +64,6 @@ RUN ldconfig
 ## Config
 WORKDIR /app
 RUN mkdir -p config media
-COPY server.conf config/
 
 # Install ffmpeg to forward stream to broadcaster
 RUN apt-get update
