@@ -65,9 +65,14 @@ RUN ldconfig
 WORKDIR /app
 RUN mkdir -p config media
 COPY server.conf config/
+
+# Install ffmpeg to forward stream to broadcaster
+RUN apt-get update
+RUN apt-get install -y ffmpeg
 ##
 ##EXPOSE 4242 8080 1935 554 8889
 #
-ENTRYPOINT ["MistController",  "-c", "/app/config/server.conf"]
+ENTRYPOINT ["MistController"]
+
 
 #VOLUME /config /media
